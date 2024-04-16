@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#D0000000"
+    android:layout_alignParentBottom="true"> <!-- Align at the bottom of the parent -->
+
+
+    <ImageButton
+        android:id="@+id/btn_play_pause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_play_arrow"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="play or pause"
+        app:tint="@color/colorPrimary" />
+
+    <SeekBar
+        android:id="@+id/seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="72dp"
+        android:layout_marginEnd="72dp"
+        android:layout_toStartOf="@id/btn_fullscreen"
+        android:layout_toEndOf="@id/btn_play_pause"
+        android:progressTint="@color/colorAccent"
+        android:thumbTint="@color/colorAccent" />
+
+    <TextView
+        android:id="@+id/text_current_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="16dp"
+        android:layout_toStartOf="@id/btn_fullscreen"
+        android:textColor="@android:color/white"
+        android:text="00:00" />
+
+    <ImageButton
+        android:id="@+id/btn_fullscreen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_fullscreen"
+        android:background="?android:attr/selectableItemBackground"
+        android:contentDescription="fullscreen"
+        app:tint="@color/colorPrimary" />
+
+</RelativeLayout>

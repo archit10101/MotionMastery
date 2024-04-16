@@ -13,13 +13,13 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.RetrofitDBConnector;
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.UserInfo;
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.UserInfoSingleton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.List;
-import java.util.TimerTask;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -90,10 +90,15 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(List<UserInfo.MyData> userData) {
                         userInfoSingleton = UserInfoSingleton.getInstance(userData);
-                        Log.d("first",userInfoSingleton.getDataList().get(0).getFirstName());
-                        Log.d("last",userInfoSingleton.getDataList().get(0).getLastName());
-
-                        Toast.makeText(LoginActivity.this,userInfoSingleton.getDataList().get(0).getFirstName()+" "+userInfoSingleton.getDataList().get(0).getLastName(),Toast.LENGTH_SHORT);
+                        Intent intent = new Intent(LoginActivity.this,AppActivity.class);
+                        startActivity(intent);
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                finish();
+                            }
+                        }, 1500);
                     }
 
                     @Override

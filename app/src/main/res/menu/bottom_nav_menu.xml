@@ -1,24 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+
     <item
         android:id="@+id/navHome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:title="Home" />
+        android:title="Home"
+        android:iconTint="#000"
+        android:icon="@drawable/home_icon"/>
     <item
         android:id="@+id/navSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:title="Search" />
+        android:title="Search"
+        android:iconTint="#000"
+
+        android:icon="@drawable/search_icon"/>
     <item
         android:id="@+id/navCreate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:title="Create" />
+        android:title="Create"
+        android:iconTint="#000"
+
+        android:icon="@drawable/create_icon"/>
     <item
         android:id="@+id/navSettings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:title="Settings" />
+        android:title="Settings"
+        android:iconTint="#000"
+
+        android:icon="@drawable/settings_icon"/>
 </menu>

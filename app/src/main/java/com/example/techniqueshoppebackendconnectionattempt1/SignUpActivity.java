@@ -6,14 +6,15 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.RetrofitDBConnector;
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.UserInfo;
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.UserInfoSingleton;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
@@ -75,15 +76,21 @@ public class SignUpActivity extends AppCompatActivity {
         signup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UserInfo.MyData userInfo = new UserInfo.MyData(0,usernameBox.getText().toString(),passwordBox.getText().toString(),emailBox.getText().toString(),firstnameBox.getText().toString(),lastnameBox.getText().toString());
+                UserInfo.MyData userInfo = new UserInfo.MyData(0,usernameBox.getText().toString(),passwordBox.getText().toString(),emailBox.getText().toString(),firstnameBox.getText().toString(),lastnameBox.getText().toString(),"unknown");
 
                 rdbc.postNewUser(userInfo, new LoginActivity.UserCallback() {
                     @Override
                     public void onSuccess(List<UserInfo.MyData> userData) {
                         userInfoSingleton = UserInfoSingleton.getInstance(userData);
-                        Log.d("first",userInfoSingleton.getDataList().get(0).getFirstName());
-                        Log.d("last",userInfoSingleton.getDataList().get(0).getLastName());
-                    }
+                        Intent intent = new Intent(SignUpActivity.this,AppActivity.class);
+                        startActivity(intent);
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                finish();
+                            }
+                        }, 1500);                    }
 
                     @Override
                     public void onFailure(String errorMessage) {

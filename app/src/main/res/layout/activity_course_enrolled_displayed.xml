@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- Scrollable Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/image_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/baseline_close_24"
+                android:layout_gravity="start"
+                android:contentDescription="Close"
+                android:padding="8dp"/>
+
+            <!-- Course Title -->
+            <TextView
+                android:id="@+id/text_course_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="35sp"
+                android:textColor="@android:color/black"
+                android:padding="16dp"
+                android:text="Course Title"
+                android:fontFamily="@font/oswald"
+                android:textAlignment="center"
+                android:textStyle="bold" />
+
+            <!-- Author Layout: Image on left, Name on right -->
+            <LinearLayout
+                android:id="@+id/layout_author"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center"
+                android:layout_below="@id/image_course">
+
+                <!-- Author Image -->
+                <ImageView
+                    android:id="@+id/image_author"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/technique_logo"
+                    android:scaleType="centerCrop"
+                    android:layout_gravity="center_vertical" />
+
+                <!-- Author Name -->
+                <TextView
+                    android:id="@+id/text_author_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textColor="@android:color/black"
+                    android:paddingStart="16dp"
+                    android:text="Author Name" />
+            </LinearLayout>
+
+            <!-- Course Image -->
+            <ImageView
+                android:id="@+id/image_course"
+                android:layout_width="154dp"
+                android:layout_height="153dp"
+                android:layout_below="@id/text_course_title"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="16dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/technique_logo" />
+
+            <!-- Course Description -->
+            <TextView
+                android:id="@+id/text_course_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"
+                android:padding="16dp"
+                android:textAlignment="center"
+                android:fontFamily="sans-serif-condensed"
+                android:layout_below="@id/layout_author"
+                android:text="Course Description" />
+
+            <!-- Dummy View to Help ScrollView Scroll -->
+            <View
+                android:id="@+id/dummy_view"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_below="@id/text_course_description" />
+            <!-- RecyclerView for Related Items -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_related_items"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:layout_below="@id/dummy_view"
+                android:clipToPadding="false"
+                android:clipChildren="false" />
+        </RelativeLayout>
+
+
+    </ScrollView>
+
+
+</RelativeLayout>
