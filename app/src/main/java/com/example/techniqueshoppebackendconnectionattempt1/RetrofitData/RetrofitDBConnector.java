@@ -1,17 +1,26 @@
 package com.example.techniqueshoppebackendconnectionattempt1.RetrofitData;
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+import static androidx.core.content.ContentProviderCompat.requireContext;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.techniqueshoppebackendconnectionattempt1.Fragments.CreateDialog;
 import com.example.techniqueshoppebackendconnectionattempt1.Fragments.HomeFragment;
 import com.example.techniqueshoppebackendconnectionattempt1.Fragments.SearchFragment;
 import com.example.techniqueshoppebackendconnectionattempt1.LoginActivity;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -19,8 +28,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 
 public class RetrofitDBConnector {
@@ -72,6 +83,12 @@ public class RetrofitDBConnector {
         @GET("/enrolled-courses/{userID}")
         Call<List<CourseInfo>> getEnrolledCourses(@Path("userID") int userID);
 
+        @Multipart
+        @POST("/upload") // The endpoint in your Node.js server
+        Call<ResponseBody> uploadFile(@Part MultipartBody.Part file);
+
+        @GET("/download/{key}")
+        Call<ResponseBody> downloadFile(@Path("key") String key);
 
     }
 
@@ -340,5 +357,106 @@ public class RetrofitDBConnector {
         });
     }
 
+    public void uploadImage(File file, UploadCallback callback) {
+        if (file.exists()) {
+            byte[] fileBytes = convertFileToByteArray(file);
+
+            // Create a RequestBody instance from the byte array
+            RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), fileBytes);
+
+            // MultipartBody.Part is used to send the actual file name along with the request
+            MultipartBody.Part body = MultipartBody.Part.createFormData("file", "image.jpg", requestFile);
+
+            // Call the Retrofit API to upload the file
+            Call<ResponseBody> call = retrofitInterface.uploadFile(body);
+            call.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        try {
+                            String uuid = response.body().string();
+                            // Call the callback with the UUID
+                            callback.onUploadSuccess(uuid);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            callback.onUploadFailure();
+                        }
+                    } else {
+                        // Handle upload error
+                        callback.onUploadFailure();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    // Handle failure
+                    callback.onUploadFailure();
+                }
+            });
+        } else {
+            // File does not exist
+            callback.onUploadFailure();
+        }
+    }
+
+    // Callback interface for handling upload result
+    public interface UploadCallback {
+        void onUploadSuccess(String uuid);
+        void onUploadFailure();
+    }
+
+    public void downloadFile(String key, DownloadCallback callback) {
+        Call<ResponseBody> call =  retrofitInterface.downloadFile(key);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String fileContent = null;
+                    try {
+                        fileContent = response.body().string();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    Log.d("here",response.body().toString());
+                    callback.onSuccess(fileContent);
+                } else {
+                    callback.onFailure("failed");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("Retrofit", "Failed to download file", t);
+                callback.onFailure("Failed to download file");
+            }
+        });
+    }
+
+
+    public interface DownloadCallback {
+        void onSuccess(String fileContent);
+        void onFailure(String error);
+    }
+
+    private static byte[] convertFileToByteArray(File file) {
+        FileInputStream fis = null;
+        byte[] byteArray = null;
+        try {
+            fis = new FileInputStream(file);
+            byteArray = new byte[(int) file.length()];
+            fis.read(byteArray);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fis != null) {
+                    fis.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return byteArray;
+    }
 
 }
