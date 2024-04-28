@@ -1,8 +1,10 @@
 package com.example.techniqueshoppebackendconnectionattempt1;
 
+import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -14,13 +16,22 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.MediaItem;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.PlayerView;
 
 import com.example.techniqueshoppebackendconnectionattempt1.R;
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.RetrofitDBConnector;
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.UserInfoSingleton;
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.Video;
 import com.google.android.material.button.MaterialButton;
+import com.squareup.picasso.Picasso;
 
 public class ViewVideoActivity extends AppCompatActivity {
 
-    private VideoView videoView;
+    private ExoPlayer exoPlayer;
+    PlayerView playerView;
+
     private boolean isPlaying = false;
     private boolean isFullscreen = false;
 
@@ -31,14 +42,56 @@ public class ViewVideoActivity extends AppCompatActivity {
 
     private MaterialButton next;
 
+    String vidID;
+
+    Video thisVid;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_video);
 
-        videoView = findViewById(R.id.videoView);
+        vidID = "1";
+        if (getIntent().hasExtra("vidID")){
+            vidID = getIntent().getStringExtra("vidID");
+        }
+        RetrofitDBConnector rdbc = new RetrofitDBConnector();
 
-        // Initialize Handler
+        rdbc.getVidbyVidID(Integer.parseInt(vidID), new RetrofitDBConnector.VideoSingleCallback() {
+            @Override
+            public void onSuccess(Video vid) {
+                thisVid = vid;
+                Log.d("Video Path",vidID+" : "+thisVid.getVideoName()+" : "+thisVid.getVideoPath());
+                rdbc.downloadFile(thisVid.getVideoPath(), new RetrofitDBConnector.DownloadCallback() {
+                    @Override
+                    public void onSuccess(String fileContent) {
+                        Log.d("url","m"+fileContent);
+
+                        MediaItem mediaItem = MediaItem.fromUri(fileContent);
+                        exoPlayer.setMediaItem(mediaItem);
+                        exoPlayer.prepare();
+                        exoPlayer.play();
+
+
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        // Handle download failure
+                        Log.e("Download", "Download failed: " + error);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(ViewVideoActivity.this, "There was a problem: "+error,Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        exoPlayer = new ExoPlayer.Builder(this).build();
+
+        playerView = findViewById(R.id.playerView);
         handler = new Handler();
 
         back = findViewById(R.id.backButton);
@@ -58,21 +111,12 @@ public class ViewVideoActivity extends AppCompatActivity {
             }
         });
 
-        // Set the path of the video file
-        String videoPath = "android.resource://" + getPackageName() + "/" + R.raw.video;
 
-        // Set the Uri
-        Uri videoUri = Uri.parse(videoPath);
 
-        // Set up the MediaController
-        MediaController mediaController = new MediaController(this);
-        mediaController.setAnchorView(videoView);
-        videoView.setMediaController(mediaController);
+        playerView.setPlayer(exoPlayer);
 
-        // Set the video Uri to VideoView
-        videoView.setVideoURI(videoUri);
 
-        // Initialize SeekBar
+
     }
     private String formatTime(int millis) {
         int seconds = millis / 1000;

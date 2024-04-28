@@ -3,17 +3,22 @@ package com.example.techniqueshoppebackendconnectionattempt1.RetrofitData;
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 import static androidx.core.content.ContentProviderCompat.requireContext;
 
+import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.example.techniqueshoppebackendconnectionattempt1.Fragments.CreateDialog;
 import com.example.techniqueshoppebackendconnectionattempt1.Fragments.HomeFragment;
 import com.example.techniqueshoppebackendconnectionattempt1.Fragments.SearchFragment;
 import com.example.techniqueshoppebackendconnectionattempt1.LoginActivity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,11 +33,13 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Url;
 
 public class RetrofitDBConnector {
 
@@ -83,13 +90,63 @@ public class RetrofitDBConnector {
         @GET("/enrolled-courses/{userID}")
         Call<List<CourseInfo>> getEnrolledCourses(@Path("userID") int userID);
 
-        @Multipart
-        @POST("/upload") // The endpoint in your Node.js server
-        Call<ResponseBody> uploadFile(@Part MultipartBody.Part file);
+//        @Multipart
+//        @POST("/upload") // The endpoint in your Node.js server
+//        Call<ResponseBody> uploadFile(@Part MultipartBody.Part file);
 
         @GET("/download/{key}")
         Call<ResponseBody> downloadFile(@Path("key") String key);
 
+        @GET("/videos/course_id/{courseID}")
+        Call<List<VideoTutorial>> getVideoTutorialsByCourseId(@Path("courseID") int courseID);
+
+        @POST("/videos")
+        Call<VideoTutorial> createVideoTutorial(@Body VideoTutorial videoTutorial);
+
+        @Headers("Content-Type: application/octet-stream")
+        @PUT
+        Call<ResponseBody> uploadWithUrlBig(@Url String url, @Part MultipartBody.Part file);
+
+        @Headers("Content-Type: application/octet-stream")
+        @PUT
+        Call<ResponseBody> uploadWithUrlSmall(@Url String url, @Body RequestBody body);
+
+        @GET("/upload")
+        Call<PresignedUrlResponse> getPresignedUpload();
+
+        @GET("/videos/{videoID}")
+        Call<Video> getVideoByID(@Path("videoID") int videoID);
+
+
+    }
+
+
+    public void getVidbyVidID(int vidID, VideoSingleCallback callback) {
+        retrofitInterface.getVideoByID(vidID).enqueue(new Callback<Video>() {
+            @Override
+            public void onResponse(Call<Video> call, Response<Video> response) {
+                if (response.isSuccessful()) {
+                    Video userData = response.body();
+                    if (userData != null) {
+                        callback.onSuccess(userData);
+                    } else {
+                        callback.onFailure("No data found");
+                    }
+                } else {
+                    callback.onFailure("Failed to get data. Code: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Video> call, Throwable throwable) {
+                callback.onFailure(throwable.getMessage());
+            }
+        });
+    }
+
+    public interface VideoSingleCallback {
+        void onSuccess(Video vid);
+        void onFailure(String error);
     }
 
 
@@ -357,52 +414,78 @@ public class RetrofitDBConnector {
         });
     }
 
-    public void uploadImage(File file, UploadCallback callback) {
-        if (file.exists()) {
-            byte[] fileBytes = convertFileToByteArray(file);
-
-            // Create a RequestBody instance from the byte array
-            RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), fileBytes);
-
-            // MultipartBody.Part is used to send the actual file name along with the request
-            MultipartBody.Part body = MultipartBody.Part.createFormData("file", "image.jpg", requestFile);
-
-            // Call the Retrofit API to upload the file
-            Call<ResponseBody> call = retrofitInterface.uploadFile(body);
-            call.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        try {
-                            String uuid = response.body().string();
-                            // Call the callback with the UUID
-                            callback.onUploadSuccess(uuid);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            callback.onUploadFailure();
-                        }
-                    } else {
-                        // Handle upload error
-                        callback.onUploadFailure();
-                    }
+//    public void uploadImage(File file, UploadCallback callback) {
+//        if (file.exists()) {
+//            byte[] fileBytes = convertFileToByteArray(file);
+//
+//            // Create a RequestBody instance from the byte array
+//            RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), fileBytes);
+//
+//            // MultipartBody.Part is used to send the actual file name along with the request
+//            MultipartBody.Part body = MultipartBody.Part.createFormData("file", "image.jpg", requestFile);
+//
+//            // Call the Retrofit API to upload the file
+//            Call<ResponseBody> call = retrofitInterface.uploadFile(body);
+//            call.enqueue(new Callback<ResponseBody>() {
+//                @Override
+//                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                    if (response.isSuccessful() && response.body() != null) {
+//                        try {
+//                            String uuid = response.body().string();
+//                            // Call the callback with the UUID
+//                            callback.onUploadSuccess(uuid);
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                            callback.onUploadFailure();
+//                        }
+//                    } else {
+//                        // Handle upload error
+//                        callback.onUploadFailure();
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                    // Handle failure
+//                    callback.onUploadFailure();
+//                }
+//            });
+//        } else {
+//            // File does not exist
+//            callback.onUploadFailure();
+//        }
+//    }
+public void getPresigned(UploadCallback callback) {
+    Call<PresignedUrlResponse> call =  retrofitInterface.getPresignedUpload();
+    call.enqueue(new Callback<PresignedUrlResponse>() {
+        @Override
+        public void onResponse(@NonNull Call<PresignedUrlResponse> call, @NonNull Response<PresignedUrlResponse> response) {
+            if (response.isSuccessful() && response.body() != null) {
+                PresignedUrlResponse pur = response.body();
+                try {
+                    callback.onUploadSuccess(pur);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    // Handle failure
-                    callback.onUploadFailure();
-                }
-            });
-        } else {
-            // File does not exist
-            callback.onUploadFailure();
+            } else {
+                callback.onUploadFailure("reponse success: "+ response.isSuccessful()+ "  responsebodynull: "+ response.body().toString());
+            }
         }
-    }
+
+        @Override
+        public void onFailure(Call<PresignedUrlResponse> call, Throwable t) {
+            Log.e("Retrofit", "Failed to download file", t);
+            callback.onUploadFailure("Failed to download file");
+        }
+    });
+}
+
+
 
     // Callback interface for handling upload result
     public interface UploadCallback {
-        void onUploadSuccess(String uuid);
-        void onUploadFailure();
+        void onUploadSuccess(PresignedUrlResponse uploadObject) throws IOException;
+        void onUploadFailure(String error);
     }
 
     public void downloadFile(String key, DownloadCallback callback) {
@@ -432,6 +515,10 @@ public class RetrofitDBConnector {
         });
     }
 
+    public interface VideoCallback {
+        void onSuccess(List<VideoTutorial> fileContent);
+        void onFailure(String error);
+    }
 
     public interface DownloadCallback {
         void onSuccess(String fileContent);
@@ -457,6 +544,114 @@ public class RetrofitDBConnector {
             }
         }
         return byteArray;
+    }
+
+    public void getVideoTutorialsByCourseId(int courseId, VideoCallback callback) {
+        retrofitInterface.getVideoTutorialsByCourseId(courseId).enqueue(new Callback<List<VideoTutorial>>() {
+            @Override
+            public void onResponse(Call<List<VideoTutorial>> call, Response<List<VideoTutorial>> response) {
+                if (response.isSuccessful()) {
+                    List<VideoTutorial> videoTutorials = response.body();
+                    if (videoTutorials != null && videoTutorials.size() > 0) {
+                        callback.onSuccess(videoTutorials);
+                    } else {
+                        callback.onFailure("No video tutorials found");
+                    }
+                } else {
+                    callback.onFailure("Failed to get video tutorials. Code: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<VideoTutorial>> call, Throwable throwable) {
+                callback.onFailure(throwable.getMessage());
+            }
+        });
+    }
+
+    public void createVideoTutorial(VideoTutorial videoTutorial, VideoCallback callback) {
+        retrofitInterface.createVideoTutorial(videoTutorial).enqueue(new Callback<VideoTutorial>() {
+            @Override
+            public void onResponse(Call<VideoTutorial> call, Response<VideoTutorial> response) {
+                if (response.isSuccessful()) {
+                    VideoTutorial createdVideoTutorial = response.body();
+                    if (createdVideoTutorial != null) {
+                        ArrayList<VideoTutorial> videoTutorialArrayList = new ArrayList<>();
+                        videoTutorialArrayList.add(createdVideoTutorial);
+                        callback.onSuccess(videoTutorialArrayList);
+                    } else {
+                        callback.onFailure("Failed to create video tutorial");
+                    }
+                } else {
+                    callback.onFailure("Failed to create video tutorial. Code: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<VideoTutorial> call, Throwable throwable) {
+                callback.onFailure(throwable.getMessage());
+            }
+        });
+    }
+
+    public void uploadWithURI(InputStream file, String preSignedUrl, String contentType) throws IOException {
+//        long fileSize = file.length();
+//        if (file.available() > 100 * 1024 * 1024) {
+//            uploadMultipart(file, preSignedUrl);
+//        } else {
+//        }
+        uploadSingle(file, preSignedUrl, contentType);
+
+    }
+
+//    private void uploadMultipart(InputStream file, String preSignedUrl) {
+//        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+//        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+//        Call<ResponseBody> call = retrofitInterface.uploadWithUrlBig(preSignedUrl, body);
+//        call.enqueue(new Callback<ResponseBody>() {
+//            @Override
+//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                Log.d("uploadMultipart","upload multipart successful");
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                Log.d("uploadMultipart","upload multipart failed");
+//            }
+//        });
+//    }
+
+    private void uploadSingle(InputStream inputStream, String preSignedUrl, String contentType) {
+        // Create a request body for the entire file
+        RequestBody requestBody = RequestBody.create(MediaType.parse(contentType), readStream(inputStream));
+
+        // Execute the upload request using the pre-signed URL
+        Call<ResponseBody> call = retrofitInterface.uploadWithUrlSmall(preSignedUrl, requestBody);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.d("uploadNotMultipart","upload successful");
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("uploadNotMultipart","upload failed: "+t);
+            }
+        });
+    }
+    private byte[] readStream(InputStream inputStream) {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[1024];
+        try {
+            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            buffer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return buffer.toByteArray();
     }
 
 }

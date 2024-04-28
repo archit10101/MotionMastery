@@ -2,6 +2,7 @@ package com.example.techniqueshoppebackendconnectionattempt1.Fragments;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +19,8 @@ import androidx.fragment.app.Fragment;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.techniqueshoppebackendconnectionattempt1.AddVideoCreator;
+import com.example.techniqueshoppebackendconnectionattempt1.CourseCreatedDisplayed;
 import com.example.techniqueshoppebackendconnectionattempt1.R;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.CourseInfo;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.RetrofitDBConnector;
@@ -87,7 +90,9 @@ public class CreateFragment extends Fragment {
         // Handle item click listener if needed
         gridViewCourses.setOnItemClickListener((parent, view1, position, id) -> {
             CourseInfo selectedCourse = courseList.get(position);
-            Toast.makeText(requireContext(), "Selected Course: " + selectedCourse.getCourseName(), Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getContext(), CourseCreatedDisplayed.class);
+            intent.putExtra("COURSE_ID",selectedCourse.getCourseId()+"");
+            startActivity(intent);
         });
 
         FloatingActionButton fabCreateCourse = view.findViewById(R.id.floating_action_button);

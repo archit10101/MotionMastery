@@ -5,11 +5,19 @@ public class VideoItem {
     private String description;
     private String thumbnailUrl;
 
-    public VideoItem(String name, String description, String thumbnailUrl) {
+    private int vidID;
+
+    public VideoItem(String name, String description, String thumbnailUrl, int videoID) {
         this.name = name;
         this.description = description;
         this.thumbnailUrl = thumbnailUrl;
+        this.vidID = videoID;
     }
+
+    public int getVidID() {
+        return vidID;
+    }
+
 
     public String getName() {
         return name;

@@ -22,9 +22,12 @@ import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.CourseI
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.RetrofitDBConnector;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.UserEnrolledCourse;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.UserInfoSingleton;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ViewHolder> {
 
@@ -47,9 +50,30 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ChildAdapter.ViewHolder holder, int position) {
         holder.iv_child_image.setImageResource(childModalClassList.get(position).image); //Use path name to get image from s3
-        holder.iv_author_image.setImageResource(childModalClassList.get(position).authorImage); //Use path name to get image from s3
         holder.iv_child_coursename.setText(childModalClassList.get(position).courseName);
         holder.iv_author_name.setText(childModalClassList.get(position).authorName);
+        RetrofitDBConnector rdbc = new RetrofitDBConnector();
+
+        Log.d("downloadStuff",childModalClassList.get(position).authorImage+"");
+        rdbc.downloadFile(childModalClassList.get(position).authorImage, new RetrofitDBConnector.DownloadCallback() {
+            @Override
+            public void onSuccess(String fileContent) {
+                Log.d("url","m"+fileContent);
+                Picasso.get()
+                        .load(fileContent)
+                        .placeholder(R.drawable.loading)
+                        .transform(new CropCircleTransformation())
+                        .into(holder.iv_author_image);
+
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Handle download failure
+                Log.e("Download", "Download failed: " + error);
+            }
+        });
+
 
     }
 

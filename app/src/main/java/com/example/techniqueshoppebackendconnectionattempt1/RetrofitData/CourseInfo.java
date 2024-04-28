@@ -18,7 +18,7 @@ public class CourseInfo {
     @SerializedName("courseAuthorID")
     private int courseAuthorId;
 
-    @SerializedName("courseAuthorImgPath")
+    @SerializedName("courseAuthorImgpath")
     private String courseAuthorImgPath;
 
     @SerializedName("courseImgPath")

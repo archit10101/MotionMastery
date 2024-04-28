@@ -2,18 +2,14 @@ package com.example.techniqueshoppebackendconnectionattempt1.Fragments;
 
 import static android.app.Activity.RESULT_OK;
 
+
 import android.Manifest;
-import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.techniqueshoppebackendconnectionattempt1.R;
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.PresignedUrlResponse;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.RetrofitDBConnector;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.UserInfo;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.UserInfoSingleton;
@@ -37,12 +34,12 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
 public class SettingsFragment extends Fragment {
     private TextInputLayout layoutUsername, layoutPassword, layoutEmail, layoutFirstName, layoutLastName;
@@ -51,6 +48,8 @@ public class SettingsFragment extends Fragment {
 
     private ImageView userImage;
 
+
+
     private MaterialButton uploadImage;
 
     private UserInfo.MyData user;
@@ -58,7 +57,6 @@ public class SettingsFragment extends Fragment {
     private static final int PERMISSION_REQUEST_CODE = 2;
 
 
-    private String uuid;
     private RetrofitDBConnector rdbc;
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
@@ -125,7 +123,8 @@ public class SettingsFragment extends Fragment {
                 Log.d("url","m"+fileContent);
                 Picasso.get()
                         .load(fileContent)
-                        .placeholder(R.drawable.loading) // Placeholder image while loadin
+                        .placeholder(R.drawable.loading)
+                        .transform(new CropCircleTransformation())
                         .into(userImage);
 
             }
@@ -141,8 +140,7 @@ public class SettingsFragment extends Fragment {
     }
     private void openImagePicker() {
         Log.d("I am here","This is openImagePicker");
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
     private void updateViews() {
@@ -151,23 +149,6 @@ public class SettingsFragment extends Fragment {
         editEmail.setText(user.getUserEmail());
         editFirstName.setText(user.getFirstName());
         editLastName.setText(user.getLastName());
-    }
-    private File bitmapToFile(Bitmap bitmap) {
-        try {
-            // Create a file to store the bitmap
-            File file = new File(requireContext().getCacheDir(), "temp_image.jpg");
-
-            // Compress the bitmap to JPEG format
-            FileOutputStream fos = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
-            fos.flush();
-            fos.close();
-
-            return file;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     private void setEditable(boolean isEditable) {
@@ -203,93 +184,79 @@ public class SettingsFragment extends Fragment {
         }
     }
 
+    private String uuid;
+    private String urlPresigned;
+
+    private File imageFile;
+
+    private InputStream inputStream;
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK )
         {
-            try {
-                Log.d("here","here");
-                Uri imgUri = data.getData();
+            Log.d("here","here");
+            Uri imageUri = data.getData();
 
-                Bitmap photo = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), data.getData());
-                rdbc.uploadImage(bitmapToFile(photo), new RetrofitDBConnector.UploadCallback() {
+            if (imageUri != null){
+                Intent intent = new Intent(getActivity(),CropperActivity.class);
+                intent.putExtra("DATA",imageUri.toString());
+                startActivityForResult(intent,101001);
+            }
+
+        }else if (requestCode == 101001 && resultCode == -1 && data != null) {
+            // Handle cropped image result
+
+            String result = data.getStringExtra("RESULT");
+            Uri resultUri = null;
+            if (result != null) {
+                resultUri = Uri.parse(result);
+
+
+            }
+
+            Picasso.get()
+                    .load(resultUri)
+                    .placeholder(R.drawable.loading)
+                    .transform(new CropCircleTransformation())
+                    .into(userImage);
+            inputStream = convertUriToInputStream(resultUri);
+            if (inputStream != null){
+                rdbc.getPresigned(new RetrofitDBConnector.UploadCallback() {
                     @Override
-                    public void onUploadSuccess(String uuid) {
-                        Log.d("uid works",uuid);
-                        UserInfoSingleton.getInstance().getDataList().get(0).setUserImagePath(uuid);
+                    public void onUploadSuccess(PresignedUrlResponse uploadObject) throws IOException {
+                        uuid = uploadObject.getUuid();
+                        urlPresigned = uploadObject.getUrl();
+                        Log.d("uuid",uuid);
+                        Log.d("urlPresigned",urlPresigned);
+                        rdbc.uploadWithURI(inputStream, urlPresigned, "image/*");
+
+                        user.setUserImagePath(uuid);
+
                     }
 
                     @Override
-                    public void onUploadFailure() {
-
+                    public void onUploadFailure(String error) {
+                        Log.d("imageError",error);
                     }
+
                 });
-            } catch (Exception e) {
 
             }
+
         }
+
+
+
     }
-
-
-//    private void uploadImage(Bitmap bitmap) {
-//        if (bitmap != null) {
-//
-//
-//            rdbc.uploadFile(byteArray, new RetrofitDBConnector.UploadCallback() {
-//                @Override
-//                public void onSuccess(String uuid) {
-//                    // Handle successful upload, UUID received
-//                    Log.d("Upload", "Upload successful, UUID: " + uuid);
-//
-//                    // Update user's image path
-//                    UserInfoSingleton.getInstance().getDataList().get(0).setUserImagePath(uuid);
-//
-//                    // Download and display the updated image
-//                    rdbc.downloadFile(uuid, new RetrofitDBConnector.DownloadCallback() {
-//                        @Override
-//                        public void onSuccess(String fileContent) {
-//                            displayImageFromContent(fileContent, userImage);
-//                        }
-//
-//                        @Override
-//                        public void onFailure(String error) {
-//                            // Handle download failure
-//                            Log.e("Download", "Download failed: " + error);
-//                        }
-//                    });
-//                }
-//
-//                @Override
-//                public void onFailure(String error) {
-//                    // Handle upload failure
-//                    Log.e("Upload", "Upload failed: " + error);
-//                    Toast.makeText(requireContext(), "Upload failed: " + error, Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//        } else {
-//            Toast.makeText(requireContext(), "Bitmap is null", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-    private Bitmap uriToBitmap(Uri uri) {
+    private InputStream convertUriToInputStream(Uri uri) {
         try {
-            // Use the content resolver to open the input stream from the URI
-            InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
-
-            // Decode the input stream into a Bitmap
-            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-
-            // Close the input stream
-            if (inputStream != null) {
-                inputStream.close();
-            }
-
-            return bitmap;
+            InputStream inputStream = getActivity().getContentResolver().openInputStream(uri);
+            return inputStream;
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
-
 
 }

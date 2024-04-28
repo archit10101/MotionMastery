@@ -15,6 +15,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
@@ -41,12 +43,17 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         // Set data to views
         holder.videoName.setText(videoItem.getName());
         holder.videoDescription.setText(videoItem.getDescription());
+        holder.setVidID(videoItem.getVidID()+"");
 
         // Here, you would load the actual thumbnail image using a library like Picasso or Glide
         // For example using Glide:
         // Glide.with(context).load(videoItem.getThumbnailUrl()).into(holder.videoThumbnail);
         // Placeholder image used for demonstration
-        holder.videoThumbnail.setImageResource(R.drawable.technique_logo);
+        Picasso.get()
+                .load(videoItem.getThumbnailUrl())
+                .placeholder(R.drawable.loading)
+                .into(holder.videoThumbnail);
+
 
 
     }
@@ -63,7 +70,13 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         TextView videoName;
         TextView videoDescription;
 
-        boolean firstClick = false;
+        String vidID;
+
+        public void setVidID(String vidID) {
+            this.vidID = vidID;
+        }
+
+        boolean secondCLick = false;
         public VideoViewHolder(@NonNull View itemView, Context cont) {
             super(itemView);
 
@@ -74,11 +87,12 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (firstClick){
+                    if (secondCLick){
                         Intent intent = new Intent(context,ViewVideoActivity.class);
+                        intent.putExtra("vidID",vidID);
                         context.startActivity(intent);
                     }else{
-                        firstClick = true;
+                        secondCLick = true;
                         videoDescription.setVisibility(View.VISIBLE);
                         Handler handler = new Handler(Looper.getMainLooper());
 
@@ -86,7 +100,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                firstClick = false;
+                                secondCLick = false;
                                 videoDescription.setVisibility(View.GONE);
                             }
                         }, 3000); // 3000 milliseconds = 3 seconds
