@@ -1,5 +1,6 @@
 package com.example.techniqueshoppebackendconnectionattempt1;
 
+import android.content.Intent;
 import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +21,8 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
 
+import com.example.techniqueshoppebackendconnectionattempt1.Practice.GettingDemoActivity;
+import com.example.techniqueshoppebackendconnectionattempt1.Practice.RecordActivity;
 import com.example.techniqueshoppebackendconnectionattempt1.R;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.RetrofitDBConnector;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.UserInfoSingleton;
@@ -107,7 +110,9 @@ public class ViewVideoActivity extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Go to practice.
+                Intent intent = new Intent(ViewVideoActivity.this, GettingDemoActivity.class);
+                intent.putExtra("vidID",vidID);
+                startActivity(intent);
             }
         });
 
@@ -130,5 +135,18 @@ public class ViewVideoActivity extends AppCompatActivity {
         super.onDestroy();
         // Remove any pending callbacks to prevent memory leaks
         handler.removeCallbacksAndMessages(null);
+        if (exoPlayer != null) {
+            exoPlayer.release(); // Release player resources
+        }
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (exoPlayer != null) {
+            exoPlayer.setPlayWhenReady(false); // Pause playback
+        }
+    }
+
+
 }

@@ -1,113 +1,278 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/vid_close"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/baseline_close_24"
-        android:layout_gravity="start"
-        android:contentDescription="Close"
-        android:padding="8dp"/>
-
-    <!-- Course Name Title -->
-
-    <!-- Course Name EditText -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/oswald"
-        android:text="Tutorial Name"
-
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textStyle="bold" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputVidName"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Tutorial Name"
-        android:fontFamily="@font/oswald"
-        >
+        android:orientation="vertical"
+        android:padding="16dp">
 
+        <ImageView
+            android:id="@+id/vid_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_close_24"
+            android:layout_gravity="start"
+            android:contentDescription="Close"
+            android:padding="8dp"/>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editVidName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+        <!-- Course Name Title -->
 
-    </com.google.android.material.textfield.TextInputLayout>
+        <!-- Course Name EditText -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/oswald"
+            android:text="Tutorial Name"
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Video Description"
-        android:fontFamily="@font/oswald"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"/>
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputVidDescription"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/oswald"
-        android:hint="Enter Video Description">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editVidDescription"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputVidName"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textMultiLine"
-            android:minLines="3"
-            android:maxLines="5"/>
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Upload Video"
-        android:fontFamily="@font/oswald"
-
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"/>
-
-    <!-- Upload Image Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_upload_video"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Upload Video"
-        app:cornerRadius="8dp"
-        app:icon="@drawable/baseline_upload_24"
-        app:iconTint="#000"
-        app:iconGravity="start"
-        android:layout_marginTop="8dp"
-        android:outlineSpotShadowColor="@color/colorPrimaryDark"
-        android:textColor="#000"/>
+            android:hint="Enter Tutorial Name"
+            android:fontFamily="@font/oswald"
+            >
 
 
-    <!-- Create Course Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_create_video"
-        style="@style/Widget.MaterialComponents.Button"
-        android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editVidName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Create Video"
-        android:backgroundTint="@color/colorPrimaryDark"
+        </com.google.android.material.textfield.TextInputLayout>
 
-        app:cornerRadius="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Video Description"
+            android:fontFamily="@font/oswald"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
 
-</LinearLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputVidDescription"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/oswald"
+            android:hint="Enter Video Description">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editVidDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:maxLines="5"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload Video"
+            android:fontFamily="@font/oswald"
+
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <!-- Upload Image Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_upload_video"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload Video"
+            app:cornerRadius="8dp"
+            app:icon="@drawable/baseline_upload_24"
+            app:iconTint="#000"
+            app:iconGravity="start"
+            android:layout_marginTop="8dp"
+            android:outlineSpotShadowColor="@color/colorPrimaryDark"
+            android:textColor="#000"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Instructions"
+            android:fontFamily="@font/oswald"
+            android:id="@+id/instructions"
+            android:visibility="gone"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <androidx.media3.ui.PlayerView
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:visibility="gone"
+            android:id="@+id/playerView"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:id="@+id/videoControls"
+            android:visibility="gone">
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/vidDeleteButton"
+                android:text="Delete"
+                app:cornerRadius="8dp"
+                style="@style/Widget.MaterialComponents.FloatingActionButton"
+                app:backgroundTint="@color/colorPrimaryDark"
+                android:fontFamily="sans-serif"
+                android:textColor="#fff"
+                android:layout_margin="20dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/vidSelectButton"
+                android:text="Select"
+                app:cornerRadius="8dp"
+                style="@style/Widget.MaterialComponents.FloatingActionButton"
+                app:backgroundTint="@color/colorPrimaryDark"
+                android:fontFamily="sans-serif"
+                android:textColor="#fff"
+                android:layout_margin="20dp"/>
+
+
+
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload Demo (Slow Motion Suggested)"
+            android:fontFamily="@font/oswald"
+
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <!-- Upload Image Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_upload_demo"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload Demo"
+            app:cornerRadius="8dp"
+            app:icon="@drawable/baseline_upload_24"
+            app:iconTint="#000"
+            app:iconGravity="start"
+            android:layout_marginTop="8dp"
+            android:outlineSpotShadowColor="@color/colorPrimaryDark"
+            android:textColor="#000"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Instructions"
+            android:fontFamily="@font/oswald"
+            android:id="@+id/demo_instructions"
+            android:visibility="gone"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"/>
+
+        <androidx.media3.ui.PlayerView
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:visibility="gone"
+            android:id="@+id/demo_playerView"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:id="@+id/demoControls"
+            android:visibility="gone">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/leftDemoButton"
+                style="@style/Widget.MaterialComponents.FloatingActionButton"
+                android:layout_width="54dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text=""
+                android:textColor="#fff"
+                app:backgroundTint="@color/colorPrimaryDark"
+                app:cornerRadius="8dp"
+                app:icon="@drawable/baseline_arrow_back_24"
+                app:iconGravity="end" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/demoDeleteControl"
+                android:text="Delete"
+                app:cornerRadius="8dp"
+                style="@style/Widget.MaterialComponents.FloatingActionButton"
+                app:backgroundTint="@color/colorPrimaryDark"
+                android:fontFamily="sans-serif"
+                android:textColor="#fff"
+                android:layout_margin="20dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/demoSelectButton"
+                android:text="Select"
+                app:cornerRadius="8dp"
+                style="@style/Widget.MaterialComponents.FloatingActionButton"
+                app:backgroundTint="@color/colorPrimaryDark"
+                android:fontFamily="sans-serif"
+                android:textColor="#fff"
+                android:layout_margin="20dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/rightDemoButton"
+                style="@style/Widget.MaterialComponents.FloatingActionButton"
+                android:layout_width="54dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text=""
+                android:textColor="#fff"
+                app:backgroundTint="@color/colorPrimaryDark"
+                app:cornerRadius="8dp"
+                app:icon="@drawable/baseline_arrow_forward_24"
+                app:iconGravity="end" />
+
+
+
+
+        </LinearLayout>
+
+
+
+        <!-- Create Course Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_create_video"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Create Video"
+            android:backgroundTint="@color/colorPrimaryDark"
+
+            app:cornerRadius="8dp"/>
+
+    </LinearLayout>
+</ScrollView>

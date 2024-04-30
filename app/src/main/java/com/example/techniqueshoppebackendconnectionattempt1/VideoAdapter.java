@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.RetrofitDBConnector;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -45,14 +46,23 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         holder.videoDescription.setText(videoItem.getDescription());
         holder.setVidID(videoItem.getVidID()+"");
 
-        // Here, you would load the actual thumbnail image using a library like Picasso or Glide
-        // For example using Glide:
-        // Glide.with(context).load(videoItem.getThumbnailUrl()).into(holder.videoThumbnail);
-        // Placeholder image used for demonstration
-        Picasso.get()
-                .load(videoItem.getThumbnailUrl())
-                .placeholder(R.drawable.loading)
-                .into(holder.videoThumbnail);
+
+        RetrofitDBConnector rdbc = new RetrofitDBConnector();
+
+        rdbc.downloadFile(videoItem.getThumbnailUrl(), new RetrofitDBConnector.DownloadCallback() {
+            @Override
+            public void onSuccess(String fileContent) {
+                Picasso.get()
+                        .load(fileContent)
+                        .placeholder(R.drawable.loading)
+                        .into(holder.videoThumbnail);
+            }
+
+            @Override
+            public void onFailure(String error) {
+
+            }
+        });
 
 
 

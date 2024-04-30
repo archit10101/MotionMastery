@@ -117,6 +117,12 @@ public class RetrofitDBConnector {
         @GET("/videos/{videoID}")
         Call<Video> getVideoByID(@Path("videoID") int videoID);
 
+        @POST("/create-demo")
+        Call<Void> createDemo(@Body DemoInfo demoInfo);
+
+        @GET("/demos/{videoID}")
+        Call<List<DemoInfo>> getDemosByVideoID(@Path("videoID") String videoID);
+
 
     }
 
@@ -652,6 +658,59 @@ public void getPresigned(UploadCallback callback) {
             e.printStackTrace();
         }
         return buffer.toByteArray();
+    }
+    public void postNewDemo(DemoInfo demo, DemoCallback demoCreatedSuccessfully) {
+        retrofitInterface.createDemo(demo).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d("Retrofit", "Demo created successfully");
+                    demoCreatedSuccessfully.onSuccess();
+                } else {
+                    Log.e("Retrofit", "Failed to create demo");
+                    demoCreatedSuccessfully.onFailure("Failed to create demo");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("Retrofit", "Error creating demo: " + t.getMessage());
+                demoCreatedSuccessfully.onFailure(t.getMessage());
+            }
+        });
+    }
+
+    public void getDemosByVideoID(String videoID, DemoCallback callback){
+        Call<List<DemoInfo>> call = retrofitInterface.getDemosByVideoID(videoID);
+
+        call.enqueue(new Callback<List<DemoInfo>>() {
+            @Override
+            public void onResponse(Call<List<DemoInfo>> call, Response<List<DemoInfo>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<DemoInfo> demos = response.body();
+                    for (DemoInfo demo : demos) {
+                        Log.d("Retrofit", "DemoID: " + demo.getDemoId() + ", VideoID: " + demo.getVideoId());
+                    }
+                    callback.onSuccess(demos);
+                } else {
+                    callback.onFailure("Failed to fetch demos");
+                    Log.e("Retrofit", "Failed to fetch demos");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<DemoInfo>> call, Throwable t) {
+                callback.onFailure("Error fetching demos: " + t.getMessage());
+                Log.e("Retrofit", "Error fetching demos: " + t.getMessage());
+            }
+        });
+    }
+
+    public interface DemoCallback {
+        void onSuccess(List<DemoInfo> demos);
+        void onSuccess();
+
+        void onFailure(String errorMessage);
     }
 
 }

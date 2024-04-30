@@ -1,0 +1,134 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/opacityLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:textSize="20sp"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="@font/oswald"
+        android:text="Overlay Opacity"
+        android:textColor="@android:color/black" />
+
+    <SeekBar
+        android:id="@+id/opacitySeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/opacityLabel"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:max="100" />
+
+    <!-- Label for the SeekBar -->
+
+
+    <!-- FrameLayout containing PlayerView and ImageView -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+
+        android:layout_centerInParent="true"
+        android:layout_below="@id/opacitySeekBar"
+        android:id="@id/frameLayout"
+        android:layout_centerHorizontal="true">
+
+        <!-- ExoPlayer PlayerView -->
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/exoPlayerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black" />
+
+        <!-- ImageView overlay -->
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter" />
+
+    </FrameLayout>
+
+    <!-- TextView with instructions -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/instructions"
+        android:textSize="20sp"
+        android:layout_below="@id/frameLayout"
+        android:fontFamily="@font/oswald"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:text="Instructions"
+        android:textColor="@android:color/black" />
+
+    <!-- Line of four buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/instructions"
+        android:layout_marginTop="8dp"
+        android:id="@+id/linearLayout"
+        android:gravity="center_horizontal">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@android:color/white"
+            android:layout_marginEnd="10dp"
+            android:id="@+id/leftButton"
+
+            android:src="@drawable/baseline_arrow_back_24"
+            android:backgroundTint="@color/colorPrimaryDark"
+            app:tint="@color/colorPrimary" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete"
+            android:id="@+id/deleteButton"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/colorPrimaryDark"
+            android:layout_marginStart="8dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select"
+            android:id="@+id/selectButton"
+
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/colorPrimaryDark"
+            android:layout_marginStart="8dp" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:id="@+id/rightButton"
+
+            android:textColor="@android:color/white"
+            android:src="@drawable/baseline_arrow_forward_24"
+            android:backgroundTint="@color/colorPrimaryDark"
+            app:tint="@color/colorPrimary" />
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Check"
+        android:id="@+id/checkButton"
+        android:layout_below="@id/linearLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/colorPrimaryDark"
+        android:layout_marginStart="8dp" />
+
+</RelativeLayout>

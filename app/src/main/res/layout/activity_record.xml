@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Practice.RecordActivity">
+
+
+
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#000"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/flipCamera"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="start"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/baseline_flip_camera_ios_24" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/overlaySwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Overlay"
+            android:textColor="@color/colorPrimary"
+            android:checked="false" />
+
+        <ImageButton
+            android:id="@+id/leftbutton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="start"
+            android:visibility="gone"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/baseline_arrow_back_24"
+            app:tint="@color/colorPrimary" />
+        <ImageButton
+            android:id="@+id/rightbutton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:visibility="gone"
+            android:layout_gravity="start"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/baseline_arrow_forward_24"
+            app:tint="@color/colorPrimary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimary"
+            android:id="@+id/stepText"
+            android:visibility="gone"
+            android:text="Step 1"/>
+
+
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/top_bar">
+
+        <!-- Camera Preview -->
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:id="@+id/imageOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.5" />
+
+    </FrameLayout>
+
+
+    <ImageButton
+        android:id="@+id/capture"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="40dp"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/baseline_fiber_manual_record_24" />
+
+
+</RelativeLayout>
