@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
 public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ViewHolder> {
 
@@ -49,21 +50,32 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ChildAdapter.ViewHolder holder, int position) {
-        holder.iv_child_image.setImageResource(childModalClassList.get(position).image); //Use path name to get image from s3
         holder.iv_child_coursename.setText(childModalClassList.get(position).courseName);
         holder.iv_author_name.setText(childModalClassList.get(position).authorName);
-        RetrofitDBConnector rdbc = new RetrofitDBConnector();
 
         Log.d("downloadStuff",childModalClassList.get(position).authorImage+"");
-        rdbc.downloadFile(childModalClassList.get(position).authorImage, new RetrofitDBConnector.DownloadCallback() {
+        setImageFromS3Circular(holder.iv_author_image,childModalClassList.get(position).authorImage);
+        setImageFromS3(holder.iv_child_image,childModalClassList.get(position).image);
+
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return childModalClassList.size();
+    }
+
+    public void setImageFromS3(ImageView img, String path){
+        RetrofitDBConnector rdbc = new RetrofitDBConnector();
+        rdbc.downloadFile(path, new RetrofitDBConnector.DownloadCallback() {
             @Override
             public void onSuccess(String fileContent) {
                 Log.d("url","m"+fileContent);
                 Picasso.get()
                         .load(fileContent)
                         .placeholder(R.drawable.loading)
-                        .transform(new CropCircleTransformation())
-                        .into(holder.iv_author_image);
+                        .transform(new RoundedCornersTransformation(50,20))
+                        .into(img);
 
             }
 
@@ -73,13 +85,27 @@ public class ChildAdapter extends RecyclerView.Adapter<ChildAdapter.ViewHolder> 
                 Log.e("Download", "Download failed: " + error);
             }
         });
-
-
     }
+    public void setImageFromS3Circular(ImageView img, String path){
+        RetrofitDBConnector rdbc = new RetrofitDBConnector();
+        rdbc.downloadFile(path, new RetrofitDBConnector.DownloadCallback() {
+            @Override
+            public void onSuccess(String fileContent) {
+                Log.d("url","m"+fileContent);
+                Picasso.get()
+                        .load(fileContent)
+                        .placeholder(R.drawable.loading)
+                        .transform(new CropCircleTransformation())
+                        .into(img);
 
-    @Override
-    public int getItemCount() {
-        return childModalClassList.size();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Handle download failure
+                Log.e("Download", "Download failed: " + error);
+            }
+        });
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

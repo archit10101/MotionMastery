@@ -2,6 +2,7 @@ package com.example.techniqueshoppebackendconnectionattempt1.Practice;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.MyDemoS
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -109,7 +111,10 @@ public class DisplayVideoForStepFinderActivity extends AppCompatActivity {
                 retriever.setDataSource(DisplayVideoForStepFinderActivity.this, Uri.parse(videoUri));
                 String frameTime = String.valueOf(player.getCurrentPosition() * 1000); // Convert to microseconds
                 Bitmap frameBitmap = retriever.getFrameAtTime(Long.parseLong(frameTime));
-                demoSingleton.getUserBitmaps()[step-1] = frameBitmap;
+
+                Bitmap argbBitmap = frameBitmap.copy(Bitmap.Config.ARGB_8888, true);
+
+                demoSingleton.getUserBitmaps()[step-1] = argbBitmap;
                 demoSingleton.getUserTimes()[step-1] = frameTime;
             });
 
@@ -127,7 +132,16 @@ public class DisplayVideoForStepFinderActivity extends AppCompatActivity {
                     }
                 }
                 if (itWillBeOk){
-                    Toast.makeText(this,"Great Job!",Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(DisplayVideoForStepFinderActivity.this,DisplayAngleComparisionActivity.class);
+                    startActivity(intent);
+
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            finish();
+                        }
+                    }, 1500);
                 }
             });
 

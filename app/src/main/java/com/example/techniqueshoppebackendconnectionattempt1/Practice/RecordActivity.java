@@ -33,6 +33,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -127,11 +128,11 @@ public class RecordActivity extends AppCompatActivity {
 
         overlayImageview = findViewById(R.id.imageOverlay);
         overlayImageview.setImageBitmap(bitmaps[0]);
+        overlayImageview.setVisibility(View.GONE);
 
         stepText = findViewById(R.id.stepText);
 
 
-        Toast.makeText(this,vidID,Toast.LENGTH_SHORT).show();
         switchOverlay.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 backButton.setVisibility(View.VISIBLE);
@@ -237,13 +238,19 @@ public class RecordActivity extends AppCompatActivity {
                                 capture.setImageResource(R.drawable.baseline_stop_circle_24);
                             } else if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
                                 if (!((VideoRecordEvent.Finalize) videoRecordEvent).hasError()) {
-                                    String msg = "Video Capture Successful";
-                                    Toast.makeText(RecordActivity.this, msg, Toast.LENGTH_SHORT).show();
                                     Uri uri = Uri.fromFile(outputFile);
 
                                     Intent intent = new Intent(RecordActivity.this,DisplayVideoForStepFinderActivity.class);
                                     intent.putExtra("vidURI",uri.toString());
                                     startActivity(intent);
+
+                                    Handler handler = new Handler();
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            finish();
+                                        }
+                                    }, 1500);
                                 } else {
                                     recording.close();
                                     recording = null;

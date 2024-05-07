@@ -6,7 +6,7 @@ import android.util.Log;
 import com.example.techniqueshoppebackendconnectionattempt1.R;
 
 public class ChildModalClass {
-    int image;
+    String image;
 
     String courseName;
 
@@ -16,7 +16,7 @@ public class ChildModalClass {
 
     int id;
     public ChildModalClass(String image, String courseName, String authorName, String authorImage, int id) {
-        this.image = R.drawable.technique_logo;
+        this.image = image;
         this.courseName = courseName;
         this.authorName = authorName;
         this.authorImage = authorImage;

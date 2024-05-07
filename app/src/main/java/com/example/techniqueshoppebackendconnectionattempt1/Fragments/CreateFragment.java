@@ -1,5 +1,7 @@
 package com.example.techniqueshoppebackendconnectionattempt1.Fragments;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -55,12 +57,12 @@ public class CreateFragment extends Fragment {
         view =  inflater.inflate(R.layout.fragment_create, container, false);
         courseList = new ArrayList<>();
         gridViewCourses = view.findViewById(R.id.grid_view_courses);
-        gridViewAdapter = new CourseGridViewAdapter(requireContext(), courseList);
+        gridViewAdapter = new CourseGridViewAdapter(requireContext(), courseList,true);
         gridViewCourses.setAdapter(gridViewAdapter);
 
         RetrofitDBConnector connector = new RetrofitDBConnector();
         String authorName = UserInfoSingleton.getInstance().getDataList().get(0).getUserName(); // Replace with the actual author name
-        connector.getCoursesByAuthor(authorName, new CreateDialog.CourseCallback() {
+        connector.getCoursesByAuthor(authorName, new CourseCreator.CourseCallback() {
             @Override
             public void onSuccess(List<CourseInfo> courses) {
                 nocourse.setVisibility(View.GONE);
@@ -111,44 +113,40 @@ public class CreateFragment extends Fragment {
     }
 
     private void showCreateCourseDialog() {
-        CreateDialog dialog = new CreateDialog(getContext());
+        Intent intent = new Intent(getContext(),CourseCreator.class);
+        startActivityForResult(intent, 1);
 
-        dialog.setContentView(R.layout.dialog_create_course);
-
-
-        dialog.show();
-
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                RetrofitDBConnector connector = new RetrofitDBConnector();
-                String authorName = UserInfoSingleton.getInstance().getDataList().get(0).getUserName(); // Replace with the actual author name
-                connector.getCoursesByAuthor(authorName, new CreateDialog.CourseCallback() {
-                    @Override
-                    public void onSuccess(List<CourseInfo> courses) {
-                        nocourse.setVisibility(View.GONE);
-                        gridViewCourses.setVisibility(View.VISIBLE);
-                        courseList.clear();
-                        for (CourseInfo course : courses) {
-                            courseList.add(course);
-
-                        }
-                        gridViewAdapter.notifyDataSetChanged();
-
-                    }
-
-                    @Override
-                    public void onFailure(String error) {
-                        // Handle failure
-                        gridViewCourses.setVisibility(View.GONE);
-
-                        Log.e("API Error", "Failed to get courses: " + error);
-                        nocourse.setVisibility(View.VISIBLE);
-                    }
-                });
-
-            }
-        });
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == 1){
+            RetrofitDBConnector connector = new RetrofitDBConnector();
+            String authorName = UserInfoSingleton.getInstance().getDataList().get(0).getUserName(); // Replace with the actual author name
+            connector.getCoursesByAuthor(authorName, new CourseCreator.CourseCallback() {
+                @Override
+                public void onSuccess(List<CourseInfo> courses) {
+                    nocourse.setVisibility(View.GONE);
+                    gridViewCourses.setVisibility(View.VISIBLE);
+                    courseList.clear();
+                    for (CourseInfo course : courses) {
+                        courseList.add(course);
+
+                    }
+                    gridViewAdapter.notifyDataSetChanged();
+
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    // Handle failure
+                    gridViewCourses.setVisibility(View.GONE);
+
+                    Log.e("API Error", "Failed to get courses: " + error);
+                    nocourse.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+    }
 }

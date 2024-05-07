@@ -4,12 +4,17 @@ import android.Manifest;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -35,10 +40,11 @@ import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.VideoTu
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 public class AddVideoCreator extends AppCompatActivity {
@@ -94,7 +100,7 @@ public class AddVideoCreator extends AppCompatActivity {
         vidSelect = findViewById(R.id.vidSelectButton);
         demoDelete = findViewById(R.id.demoDeleteControl);
         demoSelect = findViewById(R.id.demoSelectButton);
-
+        checkStoragePermissions();
         rightdemoButton = findViewById(R.id.rightDemoButton);
         leftDemoButton = findViewById(R.id.leftDemoButton);
 
@@ -141,7 +147,7 @@ public class AddVideoCreator extends AppCompatActivity {
                 return;
             }
 
-            if (imageUrlInputStream == null){
+            if (imageFile == null){
                 Toast.makeText(this, "Please enter thumbnail", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -157,7 +163,6 @@ public class AddVideoCreator extends AppCompatActivity {
                 @Override
                 public void onSuccess(List<VideoTutorial> fileContent) {
                     VideoTutorial myVid = fileContent.get(0);
-                    Toast.makeText(AddVideoCreator.this,"Success: "+fileContent.get(0).getVideoName(),Toast.LENGTH_SHORT).show();
                     DemoInfo demo = new DemoInfo("0",""+myVid.getVideoID(),demoUriUuid,frameTimesDemo);
                     Log.d("demo test path",demoUriUuid);
                     rdbc.postNewDemo(demo, new RetrofitDBConnector.DemoCallback() {
@@ -188,45 +193,14 @@ public class AddVideoCreator extends AppCompatActivity {
 
 
 
-            ContentResolver contentResolver = getApplication().getContentResolver();
-            try (InputStream inputStream = contentResolver.openInputStream(vidUri)) {
-                if (inputStream == null){
-                    Log.d("inputStream","input stream is null");
-
-                }else{
-                    rdbc.uploadWithURI(inputStream, urlPresigned, "video/*");
-                }
-            } catch (IOException e) {
-                // Handle potential exceptions during stream opening
-                e.printStackTrace();
-            }
+            rdbc.uploadFileNew(AddVideoCreator.this,urlPresigned, vidfile);
 
 
-            try (InputStream inputStream = contentResolver.openInputStream(demoUri)) {
-                if (inputStream == null){
-                    Log.d("demo Inputstream","input stream is null");
-
-                }else{
-                    rdbc.uploadWithURI(inputStream, demoUrlPresigned, "video/*");
-                }
-            } catch (IOException e) {
-                // Handle potential exceptions during stream opening
-                e.printStackTrace();
-            }
-
-            if (imageUrlInputStream == null){
-                Log.d("image","image input stream is null");
-
-            }else{
-                try {
-                    rdbc.uploadWithURI(imageUrlInputStream, thumbnailurlPresigned, "video/*");
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            rdbc.uploadFileNew(AddVideoCreator.this, demoUrlPresigned, demoFile);
 
 
-            //Upload the videothumbnail
+            rdbc.uploadFileNew(AddVideoCreator.this, thumbnailurlPresigned, imageFile);
+
 
 
 
@@ -234,6 +208,39 @@ public class AddVideoCreator extends AppCompatActivity {
 
         });
     }
+
+    public static File getFileFromUri(Context context, Uri uri) {
+        ContentResolver contentResolver = context.getContentResolver();
+        String fileName = getFileNameFromUri(contentResolver, uri);
+        File tempFile = new File(context.getCacheDir(), fileName);
+        try (InputStream inputStream = contentResolver.openInputStream(uri);
+             OutputStream outputStream = new FileOutputStream(tempFile)) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return tempFile;
+    }
+
+    private static String getFileNameFromUri(ContentResolver contentResolver, Uri uri) {
+        String result = null;
+        try (Cursor cursor = contentResolver.query(uri, null, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                result = cursor.getString(cursor.getColumnIndexOrThrow("_display_name"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (result == null) {
+            result = uri.getLastPathSegment();
+        }
+        return result;
+    }
+
     private void openImagePicker() {
         Log.d("I am here","This is openImagePicker");
         Intent intent = new Intent(Intent.ACTION_PICK);
@@ -261,6 +268,10 @@ public class AddVideoCreator extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show();
             }
+        }if (requestCode == REQUEST_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            } else {
+            }
         }
     }
 
@@ -286,6 +297,7 @@ public class AddVideoCreator extends AppCompatActivity {
 
 
 
+
                 rdbc.getPresigned(new RetrofitDBConnector.UploadCallback() {
                     @Override
                     public void onUploadSuccess(PresignedUrlResponse uploadObject) {
@@ -293,10 +305,10 @@ public class AddVideoCreator extends AppCompatActivity {
                         urlPresigned = uploadObject.getUrl();
                         Log.d("uuid",uuid);
                         Log.d("urlPresigned",urlPresigned);
+                        videoUri = (uuid);
 
                         startVideoInstructions();
 
-                        videoUri = (uuid);
 
                     }
 
@@ -312,8 +324,9 @@ public class AddVideoCreator extends AppCompatActivity {
         }else if (requestCode == 3 && resultCode == RESULT_OK )
         {
             try {
-                Log.d("here","here");
+                String result = data.getStringExtra("RESULT");
                 demoUri = data.getData();
+
 
 
 
@@ -337,19 +350,81 @@ public class AddVideoCreator extends AppCompatActivity {
                     }
 
                 });
-            } catch (Exception e) {
+            } catch (Exception ignored) {
 
             }
         }
+    }
+    public static File convertContentUriToFile(Context context, Uri contentUri) {
+        File file = null;
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try {
+            ContentResolver contentResolver = context.getContentResolver();
+            String fileName = getFileName(contentResolver, contentUri);
+            File outputDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            file = new File(outputDir, fileName);
+            inputStream = contentResolver.openInputStream(contentUri);
+            outputStream = new FileOutputStream(file);
+            byte[] buffer = new byte[4 * 1024]; // Adjust buffer size as needed
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            return file;
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle IO exception
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Handle IO exception
+            }
+        }
+        return null;
+    }
+
+    private static String getFileName(ContentResolver contentResolver, Uri uri) {
+        String fileName = null;
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(uri, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (displayNameIndex != -1) {
+                    fileName = cursor.getString(displayNameIndex);
+                } else {
+                    fileName = "Unknown";
+                }
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return fileName;
     }
 
     private String thumbnailuuid;
 
     private String thumbnailurlPresigned;
-    private InputStream imageUrlInputStream;
+    private File imageFile;
+    private File vidfile;
+    private File demoFile;
     public void startVideoInstructions(){
         exoPlayerVideo = new ExoPlayer.Builder(AddVideoCreator.this).build();
-        MediaItem mediaItem = MediaItem.fromUri(vidUri);
+        Log.d("uri","vidUri: "+vidUri+" videoUri: "+videoUri);
+        vidfile = convertContentUriToFile(this,vidUri);
+
+
+        MediaItem mediaItem = MediaItem.fromUri(Uri.fromFile(vidfile));
         exoPlayerVideo.setMediaItem(mediaItem);
         exoPlayerVideo.prepare();
         exoPlayerVideo.play();
@@ -362,7 +437,6 @@ public class AddVideoCreator extends AppCompatActivity {
         instructionsVid.setText("Select video thumbnail.");
 
         vidDelete.setOnClickListener(v->{
-            imageUrlInputStream = null;
             thumbnailuuid = null;
             thumbnailurlPresigned = null;
         });
@@ -373,9 +447,26 @@ public class AddVideoCreator extends AppCompatActivity {
             String frameTime = String.valueOf(exoPlayerVideo.getCurrentPosition() * 1000); // Convert to microseconds
             Bitmap frameBitmap = retriever.getFrameAtTime(Long.parseLong(frameTime));
             if (frameBitmap != null) {
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                frameBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                imageUrlInputStream = new ByteArrayInputStream(stream.toByteArray());
+                // Create a temporary file
+                try {
+                    imageFile = File.createTempFile("frame", ".png", getCacheDir());
+                    // Create a FileOutputStream to write the bitmap to the temporary file
+                    FileOutputStream outputStream = new FileOutputStream(imageFile);
+
+                    // Compress and write the bitmap to the FileOutputStream
+                    frameBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+
+                    // Close the FileOutputStream
+                    outputStream.close();
+
+                    // Now you have the bitmap saved as a temporary file
+                    // Use tempFile as needed
+
+                    // Delete the temporary file when no longer needed
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    // Handle error
+                }
             }
             rdbc.getPresigned(new RetrofitDBConnector.UploadCallback() {
                 @Override
@@ -406,13 +497,38 @@ public class AddVideoCreator extends AppCompatActivity {
 
     }
 
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
+
+    // Check if we have permission to read external storage
+    private void checkStoragePermissions() {
+        int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            Log.d("permissins","no");
+            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
+        } else {
+            Log.d("permissins","yes");
+        }
+    }
+
+    // Handle the permission request response
+
+
+
     private int stepNum;
 
     private String[] frameTimesDemo = new String[12];
 
     private void startDemoInstructions(){
         exoPlayerDemo = new ExoPlayer.Builder(AddVideoCreator.this).build();
-        MediaItem mediaItem = MediaItem.fromUri(demoUri);
+        demoFile = convertContentUriToFile(this,demoUri);
+
+
+        MediaItem mediaItem = MediaItem.fromUri(Uri.fromFile(demoFile));
+
         exoPlayerDemo.setMediaItem(mediaItem);
         exoPlayerDemo.prepare();
         exoPlayerDemo.play();
@@ -482,6 +598,17 @@ public class AddVideoCreator extends AppCompatActivity {
         }
         if (exoPlayerDemo != null) {
             exoPlayerDemo.release(); // Release player resources
+        }
+
+        if (imageFile !=null){
+            imageFile.delete();
+
+        }if (vidfile !=null){
+            vidfile.delete();
+
+        }if (demoFile !=null){
+            demoFile.delete();
+
         }
     }
 

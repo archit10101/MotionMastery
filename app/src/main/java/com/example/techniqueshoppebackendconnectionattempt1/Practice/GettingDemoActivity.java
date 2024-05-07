@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.example.techniqueshoppebackendconnectionattempt1.R;
@@ -90,6 +91,14 @@ public class GettingDemoActivity extends AppCompatActivity {
                         MyDemoSingleton demoSingleton = MyDemoSingleton.getInstance(currentDemo,allBitmaps,reflectedBitmaps);
                         Intent intent = new Intent(GettingDemoActivity.this,RecordActivity.class);
                         startActivity(intent);
+
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                finish();
+                            }
+                        }, 1500);
 
                     }
 

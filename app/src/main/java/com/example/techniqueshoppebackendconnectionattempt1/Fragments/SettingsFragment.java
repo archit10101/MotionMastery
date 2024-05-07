@@ -190,6 +190,8 @@ public class SettingsFragment extends Fragment {
     private File imageFile;
 
     private InputStream inputStream;
+
+    private Uri resultUri;
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -208,7 +210,7 @@ public class SettingsFragment extends Fragment {
             // Handle cropped image result
 
             String result = data.getStringExtra("RESULT");
-            Uri resultUri = null;
+            resultUri = null;
             if (result != null) {
                 resultUri = Uri.parse(result);
 
@@ -229,8 +231,8 @@ public class SettingsFragment extends Fragment {
                         urlPresigned = uploadObject.getUrl();
                         Log.d("uuid",uuid);
                         Log.d("urlPresigned",urlPresigned);
-                        rdbc.uploadWithURI(inputStream, urlPresigned, "image/*");
-
+//                        rdbc.uploadWithURI(inputStream, urlPresigned, "image/*");
+                        rdbc.uploadFileNew(getContext(),urlPresigned,resultUri);
                         user.setUserImagePath(uuid);
 
                     }

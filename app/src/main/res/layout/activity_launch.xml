@@ -57,7 +57,7 @@
 
     <Button
         android:id="@+id/SignUpButton"
-        style="@style/Widget.Design.FloatingActionButton"
+        style="@style/Widget.Material3.Button.ElevatedButton"
         android:layout_width="150dp"
         android:layout_height="60dp"
         android:text="Sign Up"
@@ -70,11 +70,10 @@
 
     <Button
         android:id="@+id/LoginButton"
-        style="@style/Widget.Design.FloatingActionButton"
+        style="@style/Widget.Material3.Button.ElevatedButton"
         android:layout_width="130dp"
         android:layout_height="60dp"
         android:elevation="10dp"
-
         android:text="Login"
         android:textSize="20sp"
         android:textColor="#fff"

@@ -1,15 +1,17 @@
 package com.example.techniqueshoppebackendconnectionattempt1.RetrofitData;
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
-import static androidx.core.content.ContentProviderCompat.requireContext;
 
+import android.content.ContentResolver;
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.example.techniqueshoppebackendconnectionattempt1.Fragments.CreateDialog;
+import com.example.techniqueshoppebackendconnectionattempt1.Fragments.CourseCreator;
 import com.example.techniqueshoppebackendconnectionattempt1.Fragments.HomeFragment;
 import com.example.techniqueshoppebackendconnectionattempt1.Fragments.SearchFragment;
 import com.example.techniqueshoppebackendconnectionattempt1.LoginActivity;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -34,7 +37,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
-import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
@@ -122,6 +124,9 @@ public class RetrofitDBConnector {
 
         @GET("/demos/{videoID}")
         Call<List<DemoInfo>> getDemosByVideoID(@Path("videoID") String videoID);
+        @PUT
+        Call<ResponseBody> uploadFile(@Url String url, @Body RequestBody body);
+
 
 
     }
@@ -270,7 +275,7 @@ public class RetrofitDBConnector {
             }
         });
     }
-    public void postNewCourse(CourseInfo course, CreateDialog.CourseCallback courseCreatedSuccessfully) {
+    public void postNewCourse(CourseInfo course, CourseCreator.CourseCallback courseCreatedSuccessfully) {
         retrofitInterface.addCourse(course).enqueue(new Callback<CourseInfo>() {
             @Override
             public void onResponse(Call<CourseInfo> call, Response<CourseInfo> response) {
@@ -296,7 +301,7 @@ public class RetrofitDBConnector {
         });
     }
 
-    public void getCoursesByAuthor(String author, CreateDialog.CourseCallback callback) {
+    public void getCoursesByAuthor(String author, CourseCreator.CourseCallback callback) {
         retrofitInterface.getCoursesByAuthor(author).enqueue(new Callback<List<CourseInfo>>() {
             @Override
             public void onResponse(Call<List<CourseInfo>> call, Response<List<CourseInfo>> response) {
@@ -314,6 +319,26 @@ public class RetrofitDBConnector {
             }
         });
     }
+
+    public void getCoursesBySearch(String name, CourseCreator.CourseCallback callback) {
+        retrofitInterface.searchCoursesByName(name).enqueue(new Callback<List<CourseInfo>>() {
+            @Override
+            public void onResponse(Call<List<CourseInfo>> call, Response<List<CourseInfo>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<CourseInfo> courses = response.body();
+                    callback.onSuccess(courses);
+                } else {
+                    callback.onFailure("Failed to get courses by search");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<CourseInfo>> call, Throwable t) {
+                callback.onFailure(t.getMessage());
+            }
+        });
+    }
+
     public void enrollCourse(String userID, String courseID, EnrollCallback callback) {
         retrofitInterface.enrollCourse(userID, courseID).enqueue(new Callback<Void>() {
             @Override
@@ -600,7 +625,7 @@ public void getPresigned(UploadCallback callback) {
         });
     }
 
-    public void uploadWithURI(InputStream file, String preSignedUrl, String contentType) throws IOException {
+    public void uploadWithURI(File file, String preSignedUrl, String contentType) throws IOException {
 //        long fileSize = file.length();
 //        if (file.available() > 100 * 1024 * 1024) {
 //            uploadMultipart(file, preSignedUrl);
@@ -627,9 +652,9 @@ public void getPresigned(UploadCallback callback) {
 //        });
 //    }
 
-    private void uploadSingle(InputStream inputStream, String preSignedUrl, String contentType) {
+    private void uploadSingle(File file, String preSignedUrl, String contentType) {
         // Create a request body for the entire file
-        RequestBody requestBody = RequestBody.create(MediaType.parse(contentType), readStream(inputStream));
+        RequestBody requestBody = RequestBody.create(MediaType.parse(contentType), file);
 
         // Execute the upload request using the pre-signed URL
         Call<ResponseBody> call = retrofitInterface.uploadWithUrlSmall(preSignedUrl, requestBody);
@@ -713,4 +738,95 @@ public void getPresigned(UploadCallback callback) {
         void onFailure(String errorMessage);
     }
 
+
+
+//    public void uploadFileNew(Context context, String presignedUrl, Uri fileUri, ImageView imageView) {
+//        File file = new File(fileUri.getPath());
+//        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+//
+//        imageView.setImageBitmap(bitmap);
+//
+//        String mimeType = getMimeType(context, fileUri);
+//        Log.d("mime",mimeType);
+//        RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), file);
+//
+//        MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
+//
+//
+//        Call<ResponseBody> call = retrofitInterface.uploadFile(presignedUrl, filePart);
+//        call.enqueue(new Callback<ResponseBody>() {
+//            @Override
+//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                // Handle successful upload
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                // Handle upload failure
+//            }
+//        });
+//    }
+    public void uploadFileNew(Context context, String presignedUrl, Uri fileUri) {
+        File file = new File(Objects.requireNonNull(fileUri.getPath()));
+
+
+
+        // Get the MIME type of the file
+        String mimeType = getMimeType(context, fileUri);
+        Log.d("mime", mimeType);
+
+
+        // Read the file data into a RequestBody
+        RequestBody requestBody = RequestBody.create(MediaType.parse(mimeType), file);
+
+        // Make the upload request using the pre-signed URL
+        Call<ResponseBody> call = retrofitInterface.uploadFile(presignedUrl, requestBody);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.d("upload","success");
+                Toast.makeText(context,"upload successfull",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                // Handle upload failure
+            }
+        });
+    }
+
+    public void uploadFileNew(Context context, String presignedUrl, File file) {
+
+
+        // Read the file data into a RequestBody
+        RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), file);
+
+        // Make the upload request using the pre-signed URL
+        Call<ResponseBody> call = retrofitInterface.uploadFile(presignedUrl, requestBody);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.d("upload","success: "+presignedUrl);
+                Toast.makeText(context,"upload successfull",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("upload","fail");
+                Toast.makeText(context,"upload failure",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private String getMimeType(Context context,Uri uri) {
+        String mimeType;
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            ContentResolver cr = context.getContentResolver();
+            mimeType = cr.getType(uri);
+        } else {
+            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
+        }
+        return mimeType;
+    }
 }

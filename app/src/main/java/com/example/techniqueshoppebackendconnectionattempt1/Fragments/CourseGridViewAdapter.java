@@ -1,6 +1,7 @@
 package com.example.techniqueshoppebackendconnectionattempt1.Fragments;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,17 +11,26 @@ import android.widget.TextView;
 
 import com.example.techniqueshoppebackendconnectionattempt1.R;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.CourseInfo;
+import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.RetrofitDBConnector;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
 public class CourseGridViewAdapter extends BaseAdapter {
 
     private Context context;
     private List<CourseInfo> courseList;
 
-    public CourseGridViewAdapter(Context context, List<CourseInfo> courseList) {
+    private boolean editable;
+
+    public CourseGridViewAdapter(Context context, List<CourseInfo> courseList, Boolean editable) {
         this.context = context;
         this.courseList = courseList;
+        this.editable = editable;
+
     }
 
     @Override
@@ -61,8 +71,8 @@ public class CourseGridViewAdapter extends BaseAdapter {
         viewHolder.textCourseName.setText(course.getCourseName());
         viewHolder.textCourseAuthor.setText(course.getCourseAuthorName());
         viewHolder.courseID = course.getCourseId();
-        viewHolder.courseIMG.setImageResource(R.drawable.technique_logo);
-        viewHolder.authorImg.setImageResource(R.drawable.technique_logo);
+        setImageFromS3(viewHolder.courseIMG,course.getCourseImgPath());
+        setImageFromS3Circular(viewHolder.authorImg,course.getCourseAuthorImgPath());
         return view;
     }
 
@@ -76,4 +86,48 @@ public class CourseGridViewAdapter extends BaseAdapter {
         int courseID;
         ImageView authorImg;
     }
+
+    public void setImageFromS3(ImageView img, String path){
+        RetrofitDBConnector rdbc = new RetrofitDBConnector();
+        rdbc.downloadFile(path, new RetrofitDBConnector.DownloadCallback() {
+            @Override
+            public void onSuccess(String fileContent) {
+                Log.d("url","m"+fileContent);
+                Picasso.get()
+                        .load(fileContent)
+                        .placeholder(R.drawable.loading)
+                        .transform(new RoundedCornersTransformation(50,20))
+                        .into(img);
+
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Handle download failure
+                Log.e("Download", "Download failed: " + error);
+            }
+        });
+    }
+    public void setImageFromS3Circular(ImageView img, String path){
+        RetrofitDBConnector rdbc = new RetrofitDBConnector();
+        rdbc.downloadFile(path, new RetrofitDBConnector.DownloadCallback() {
+            @Override
+            public void onSuccess(String fileContent) {
+                Log.d("url","m"+fileContent);
+                Picasso.get()
+                        .load(fileContent)
+                        .placeholder(R.drawable.loading)
+                        .transform(new CropCircleTransformation())
+                        .into(img);
+
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Handle download failure
+                Log.e("Download", "Download failed: " + error);
+            }
+        });
+    }
+
 }

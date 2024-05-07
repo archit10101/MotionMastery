@@ -15,9 +15,12 @@ import com.example.techniqueshoppebackendconnectionattempt1.Fragments.SearchFrag
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.CourseInfo;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.RetrofitDBConnector;
 import com.example.techniqueshoppebackendconnectionattempt1.RetrofitData.VideoTutorial;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class CourseEnrolledDisplayed extends AppCompatActivity {
 
@@ -27,6 +30,9 @@ public class CourseEnrolledDisplayed extends AppCompatActivity {
 
     TextView courseName, authorName, courseDescription;
     ImageView courseImg,authorImg;
+
+    private RetrofitDBConnector rdbc;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,14 +61,14 @@ public class CourseEnrolledDisplayed extends AppCompatActivity {
 
         List<VideoItem> videoItems = new ArrayList<>();
 
-        RetrofitDBConnector rdbc = new RetrofitDBConnector();
+        rdbc = new RetrofitDBConnector();
         rdbc.getCourseByCourseID(courseId, new SearchFragment.CourseCallback() {
 
             @Override
             public void onSuccess(List<CourseInfo> courseData) {
                 courseName.setText(courseData.get(0).getCourseName());
-                courseImg.setImageResource(R.drawable.technique_logo);
-                authorImg.setImageResource(R.drawable.technique_logo);
+                setImageFromS3(courseImg,courseData.get(0).getCourseImgPath());
+                setImageFromS3(authorImg,courseData.get(0).getCourseAuthorImgPath());
                 authorName.setText(courseData.get(0).getCourseAuthorName());
                 courseDescription.setText(courseData.get(0).getCourseDescription());
             }
@@ -96,4 +102,26 @@ public class CourseEnrolledDisplayed extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
     }
+
+    public void setImageFromS3(ImageView img, String path){
+        rdbc.downloadFile(path, new RetrofitDBConnector.DownloadCallback() {
+            @Override
+            public void onSuccess(String fileContent) {
+                Log.d("url","m"+fileContent);
+                Picasso.get()
+                        .load(fileContent)
+                        .placeholder(R.drawable.loading)
+                        .transform(new CropCircleTransformation())
+                        .into(img);
+
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Handle download failure
+                Log.e("Download", "Download failed: " + error);
+            }
+        });
+    }
+
 }
